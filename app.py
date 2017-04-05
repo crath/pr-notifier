@@ -15,6 +15,7 @@ async def slack_send_message(to, text):
         to = '@' + to
 
     data = {
+        'username': 'GH Review Request',
         'token': SLACK_TOKEN,
         'channel': to,
         'text': text,
@@ -29,12 +30,18 @@ async def slack_send_message(to, text):
 
 async def review_requested(data):
     pr_link = data['pull_request']['html_url']
+
     sender = data['sender']['login']
+    sender_slack = USERS_ASSOCIATION.get(sender)
+
     reviewer = data['requested_reviewer']['login']
+    reviewer_slack = USERS_ASSOCIATION.get(reviewer)
 
     message = MESSAGE_TEMPLATE.format(
         sender=sender,
+        sender_slack=sender_slack,
         reviewer=reviewer,
+        reviewer_slack=reviewer_slack,
         pr_link=pr_link
     )
 
