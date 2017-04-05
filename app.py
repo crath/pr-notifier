@@ -37,6 +37,9 @@ async def review_requested(data):
     reviewer = data['requested_reviewer']['login']
     reviewer_slack = USERS_ASSOCIATION.get(reviewer)
 
+    if not reviewer_slack:
+        return
+
     message = MESSAGE_TEMPLATE.format(
         sender=sender,
         sender_slack=sender_slack,
@@ -46,7 +49,7 @@ async def review_requested(data):
     )
 
     asyncio.ensure_future(slack_send_message(
-        to=USERS_ASSOCIATION.get(reviewer),
+        to=reviewer_slack,
         text=message
     ))
 
