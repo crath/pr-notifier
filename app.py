@@ -11,7 +11,7 @@ from settings import USERS_ASSOCIATION
 
 async def slack_send_message(to, text):
 
-    if not to.startswith('@') or not to.startswith('#'):
+    if not to.startswith('@') and not to.startswith('#'):
         to = '@' + to
 
     data = {
