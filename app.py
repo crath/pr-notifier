@@ -16,7 +16,7 @@ async def slack_send_message(to, text):
     if not to.startswith('@') and not to.startswith('#'):
         to = '@' + to
 
-    logger.info('sending request review to {}: "{}"'.format(to, text))
+    logger.info('sending message to {}: "{}"'.format(to, text))
 
     data = {
         'username': 'GH Review Request',
@@ -42,6 +42,7 @@ async def review_requested(data):
     reviewer_slack = USERS_ASSOCIATION.get(reviewer)
 
     if not reviewer_slack:
+        logger.info('no slack username for @{}'.format(reviewer))
         return
 
     message = MESSAGE_TEMPLATE.format(
@@ -64,9 +65,19 @@ async def gh_webhook(request):
     h = hmac.new(GH_SECRET, await request.read(), hashlib.sha1)
 
     if h.hexdigest() != request_hmac:
+        logger.warning('{!r} - HMAC incorrect!'.format(
+            request.headers.get('X-Hub-Signature')
+        ))
+
         return web.Response(text='{}')
 
     data = await request.json()
+
+    logger.info('new event: {}:{} ({})'.format(
+        request.headers['X-Github-Event'],
+        data['action'],
+        request.headers['X-Github-Delivery'],
+    ))
 
     if data.get('action') == 'review_requested':
         await review_requested(data)
@@ -85,7 +96,7 @@ access_log_handler = logging.StreamHandler(sys.stdout)
 access_logger.addHandler(access_log_handler)
 
 # Logging
-logger = logging.getLogger('app')
+logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 log_handler = logging.StreamHandler(sys.stdout)
