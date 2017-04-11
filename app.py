@@ -1,6 +1,8 @@
 import asyncio
 import hashlib
 import hmac
+import logging
+import sys
 
 import aiohttp
 from aiohttp import web
@@ -13,6 +15,8 @@ async def slack_send_message(to, text):
 
     if not to.startswith('@') and not to.startswith('#'):
         to = '@' + to
+
+    logger.info('sending request review to {}: "{}"'.format(to, text))
 
     data = {
         'username': 'GH Review Request',
@@ -69,9 +73,28 @@ async def gh_webhook(request):
 
     return web.Response(text='{}')
 
-
+# App
 app = web.Application()
 app.router.add_post(PATH, gh_webhook)
+
+# App Access Logging
+access_logger = logging.getLogger('aiohttp.access')
+access_logger.setLevel(logging.INFO)
+
+access_log_handler = logging.StreamHandler(sys.stdout)
+access_logger.addHandler(access_log_handler)
+
+# Logging
+logger = logging.getLogger('app')
+logger.setLevel(logging.INFO)
+
+log_handler = logging.StreamHandler(sys.stdout)
+
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+log_handler.setFormatter(formatter)
+
+logger.addHandler(log_handler)
+
 
 if __name__ == '__main__':
     web.run_app(app, host=HOST, port=PORT)
