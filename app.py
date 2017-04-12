@@ -75,7 +75,7 @@ async def gh_webhook(request):
 
     logger.info('new event: {}:{} ({})'.format(
         request.headers['X-Github-Event'],
-        data['action'],
+        data.get('action'),
         request.headers['X-Github-Delivery'],
     ))
 
