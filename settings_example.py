@@ -6,7 +6,7 @@ SLACK_TOKEN = 'xoxp-123-456-789-abcdef'
 GH_SECRET = b'supersecret'  # webhook secret
 
 MESSAGE_TEMPLATE = (
-    '{sender_slack} requested PR review from {reviewer_slack}: {pr_link} '
+    '<@{sender_slack}> requested PR review from <@{reviewer_slack}>: {pr_link} '
     ':partyparrot:'
 )
 
